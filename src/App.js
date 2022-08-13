@@ -1,25 +1,62 @@
-import logo from './logo.svg';
-import './App.css';
+import {useState} from "react";
+import {FiSearch} from "react-icons/fi";
+import "./styles.css";
+import React from "react"
+import api from "./services/api";
 
-function App() {
+export default function App() {
+  const [input, setInput] = useState("");
+  const [cep, setCep] = useState({});
+
+  const handleSearch = async () => {
+    if(input.length === "") {
+      alert("Digite um CEP");
+    }
+
+    try{
+      const response = await api.get(`/${input}/json`);
+      setCep(response.data);
+      console.log(typeof(response.data.complemento));
+      setInput("");
+
+    }catch{
+      alert("Erro ao buscar CEP");
+      setInput("");
+    }
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
+    <div className="container">
+      <h1 className="title">Buscador CEP</h1>
+
+      <div className="containerInput">
+        <input 
+        type="text" 
+        placeholder="Digite o CEP" 
+        className="input"
+        onChange={(e)=> setInput(e.target.value)}
+        value={input}
+        />
+
+        <button 
+        className="buttonSearch"
+        onClick={handleSearch}
         >
-          Learn React
-        </a>
-      </header>
+          <FiSearch size={25} color={"#FFFFFF"}/>
+        </button>
+      </div>
+
+      {Object.keys(cep).length > 0 && (
+        <main className="main">
+          <h2>CEP: {cep.cep}</h2>
+          <span>{cep.logradouro}</span>
+          {(cep.complemento) !== "" && (
+            <span>Complemento: {cep.complemento}</span>
+          )}
+          <span>Bairro: {cep.bairro}</span>
+          <span>Cidade: {cep.localidade} - {cep.uf}</span>
+        </main>
+      )};
     </div>
   );
 }
-
-export default App;
